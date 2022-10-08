@@ -1,5 +1,6 @@
 package net.alekz.examples.services;
 
+import net.alekz.examples.exceptions.NoDataException;
 import net.alekz.examples.models.Examen;
 import net.alekz.examples.repositories.ExamenRepository;
 
@@ -22,6 +23,11 @@ public class ExamenServiceImpl implements ExamenService {
                 .stream()
                 .filter(e -> e.getNombre().contains(nombre))
                 .findFirst();
-        return examenOptional.orElse(null);
+        Examen examen = examenOptional.orElse(null);
+
+        if (examen == null)
+            throw new NoDataException("Examen no encontrado");
+
+        return examen;
     }
 }
