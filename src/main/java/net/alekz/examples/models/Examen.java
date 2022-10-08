@@ -8,21 +8,21 @@ import java.util.List;
  * @Date 07/10/22
  */
 public class Examen {
-    private int id;
+    private Long id;
     private String nombre;
     private List<String> preguntas;
 
-    public Examen(int id, String nombre) {
+    public Examen(Long id, String nombre) {
         this.id = id;
         this.nombre = nombre;
         this.preguntas = new ArrayList<>();
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
