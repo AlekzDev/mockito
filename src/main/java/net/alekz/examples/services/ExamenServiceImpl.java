@@ -3,7 +3,9 @@ package net.alekz.examples.services;
 import net.alekz.examples.exceptions.NoDataException;
 import net.alekz.examples.models.Examen;
 import net.alekz.examples.repositories.ExamenRepository;
+import net.alekz.examples.repositories.PreguntaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -11,23 +13,33 @@ import java.util.Optional;
  * @Date 07/10/22
  */
 public class ExamenServiceImpl implements ExamenService {
-    private ExamenRepository examenRepository;
+    private final ExamenRepository examenRepository;
+    private final PreguntaRepository preguntaRepository;
 
-    public ExamenServiceImpl(ExamenRepository examenRepository) {
+    public ExamenServiceImpl(ExamenRepository examenRepository, PreguntaRepository preguntaRepository) {
         this.examenRepository = examenRepository;
+        this.preguntaRepository = preguntaRepository;
     }
 
     @Override
-    public Examen findExamenByNombre(String nombre) {
+    public Examen findExamenByNombre(String nombre) throws NoDataException {
         Optional<Examen> examenOptional = examenRepository.findAll()
                 .stream()
-                .filter(e -> e.getNombre().contains(nombre))
+                .filter(e -> e.getNombre().equals(nombre))
                 .findFirst();
-        Examen examen = examenOptional.orElse(null);
+        return examenOptional.orElseThrow(() -> new NoDataException("Examen no encontrado"));
+    }
 
-        if (examen == null)
-            throw new NoDataException("Examen no encontrado");
-
-        return examen;
+    @Override
+    public Examen findExamenByNameWithPreguntas(String nombre) {
+        try {
+            Examen examen = findExamenByNombre(nombre);
+            List<String> preguntas = preguntaRepository.findPreguntasPorExamen(examen.getId());
+            examen.setPreguntas(preguntas);
+            return examen;
+        }catch (NoDataException nde){
+            System.err.println("No se encontró examen: " + nombre);
+            return null;
+        }
     }
 }
