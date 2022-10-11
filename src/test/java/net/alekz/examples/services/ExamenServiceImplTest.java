@@ -7,13 +7,12 @@ import net.alekz.examples.repositories.ExamenRepositoryImpl;
 import net.alekz.examples.repositories.PreguntaRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
-
-import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -110,14 +109,15 @@ public class ExamenServiceImplTest {
         examenPreguntas.setPreguntas(Datos.PREGUNTAS);
 
         when(examenRepository.guardar(any(Examen.class))).then(new Answer<Examen>() {
-                    Long id = 1L;
-                    @Override
-                    public Examen answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        Examen examen = invocationOnMock.getArgument(0);
-                        examen.setId(id++);
-                        return examen;
-                    }
-                });
+            Long id = 1L;
+
+            @Override
+            public Examen answer(InvocationOnMock invocationOnMock) throws Throwable {
+                Examen examen = invocationOnMock.getArgument(0);
+                examen.setId(id++);
+                return examen;
+            }
+        });
 
         Examen examen = service.guardar(Datos.EXAMEN);
 
@@ -129,15 +129,44 @@ public class ExamenServiceImplTest {
 
     }
 
-
     @Test
     void manejoExcepcionesTest() {
         when(examenRepository.findAll()).thenReturn(Datos.EXAMENES);
         when(preguntaRepository.findPreguntasPorExamen(anyLong())).thenThrow(IllegalArgumentException.class);
-        assertThrows(IllegalArgumentException.class, ()->{
+        assertThrows(IllegalArgumentException.class, () -> {
             service.findExamenByNameWithPreguntas("Matemáticas");
         });
+    }
 
+    @Test
+    void argumentMatchersTest() {
+        when(examenRepository.findAll()).thenReturn(Datos.EXAMENES);
+        when(preguntaRepository.findPreguntasPorExamen(anyLong())).thenReturn(Datos.PREGUNTAS);
+        service.findExamenByNameWithPreguntas("Matemáticas");
 
+        verify(examenRepository).findAll();
+        verify(preguntaRepository).findPreguntasPorExamen(argThat(arg -> arg.equals(1L)));
+    }
+
+    @Test
+    void argumentMatchersClassTest() {
+        when(examenRepository.findAll()).thenReturn(Datos.EXAMENES);
+        when(preguntaRepository.findPreguntasPorExamen(anyLong())).thenReturn(Datos.PREGUNTAS);
+        service.findExamenByNameWithPreguntas("Historia");
+
+        verify(examenRepository).findAll();
+        verify(preguntaRepository).findPreguntasPorExamen(argThat(new Argumentos()));
+    }
+
+    public static class Argumentos implements ArgumentMatcher<Long>{
+        @Override
+        public boolean matches(Long aLong) {
+            return aLong%2 == 0;
+        }
+
+        @Override
+        public String toString() {
+            return "Mensaje personalizado de error // el id debe ser par";
+        }
     }
 }
