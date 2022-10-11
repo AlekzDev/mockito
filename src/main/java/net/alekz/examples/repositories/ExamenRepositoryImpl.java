@@ -18,4 +18,9 @@ public class ExamenRepositoryImpl implements ExamenRepository{
                 new Examen(3L,"Español")
         );
     }
+
+    @Override
+    public Examen guardar(Examen examen) {
+        return null;
+    }
 }

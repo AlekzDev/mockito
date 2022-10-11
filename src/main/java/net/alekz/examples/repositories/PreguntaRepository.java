@@ -8,4 +8,5 @@ import java.util.List;
  */
 public interface PreguntaRepository {
     List<String> findPreguntasPorExamen(Long id);
+    void guardar(List<String> preguntas);
 }

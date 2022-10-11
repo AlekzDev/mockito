@@ -38,8 +38,16 @@ public class ExamenServiceImpl implements ExamenService {
             examen.setPreguntas(preguntas);
             return examen;
         }catch (NoDataException nde){
-            System.err.println("No se encontró examen: " + nombre);
+            //System.err.println("No se encontró examen: " + nombre);
             return null;
         }
+    }
+
+    @Override
+    public Examen guardar(Examen examen) {
+        if(!examen.getPreguntas().isEmpty())
+            preguntaRepository.guardar(examen.getPreguntas());
+
+        return examenRepository.guardar(examen);
     }
 }
