@@ -29,6 +29,6 @@ public class Datos {
             "Integrales"
         );
 
-    public static final Examen EXAMEN = new Examen(7L, "Física");
+    public static final Examen EXAMEN = new Examen(null, "Física");
 
 }

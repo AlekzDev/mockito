@@ -9,7 +9,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
+
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -62,6 +66,7 @@ public class ExamenServiceImplTest {
     @Test
     public void findExamenByNombreEmptyTest() {
         when(examenRepository.findAll()).thenReturn(Datos.EXAMENES_EMPTY);
+
         assertThrows(NoDataException.class, () -> {
             service.findExamenByNombre("Matemáticas");
         });
@@ -104,16 +109,35 @@ public class ExamenServiceImplTest {
         Examen examenPreguntas = Datos.EXAMEN;
         examenPreguntas.setPreguntas(Datos.PREGUNTAS);
 
-        when(examenRepository.guardar(any(Examen.class)))
-                .thenReturn(examenPreguntas);
+        when(examenRepository.guardar(any(Examen.class))).then(new Answer<Examen>() {
+                    Long id = 1L;
+                    @Override
+                    public Examen answer(InvocationOnMock invocationOnMock) throws Throwable {
+                        Examen examen = invocationOnMock.getArgument(0);
+                        examen.setId(id++);
+                        return examen;
+                    }
+                });
 
         Examen examen = service.guardar(Datos.EXAMEN);
 
         assertNotNull(examen);
-        assertEquals(7L, examen.getId());
+        assertEquals(1L, examen.getId());
         assertEquals("Física", examen.getNombre());
         System.out.println("Examen - preguntas " + examen.getPreguntas());
         verify(examenRepository).guardar(any(Examen.class));
+
+    }
+
+
+    @Test
+    void manejoExcepcionesTest() {
+        when(examenRepository.findAll()).thenReturn(Datos.EXAMENES);
+        when(preguntaRepository.findPreguntasPorExamen(anyLong())).thenThrow(IllegalArgumentException.class);
+        assertThrows(IllegalArgumentException.class, ()->{
+            service.findExamenByNameWithPreguntas("Matemáticas");
+        });
+
 
     }
 }

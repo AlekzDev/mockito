@@ -4,6 +4,7 @@ import net.alekz.examples.exceptions.NoDataException;
 import net.alekz.examples.models.Examen;
 import net.alekz.examples.repositories.ExamenRepository;
 import net.alekz.examples.repositories.PreguntaRepository;
+import net.bytebuddy.implementation.bytecode.Throw;
 
 import java.util.List;
 import java.util.Optional;
