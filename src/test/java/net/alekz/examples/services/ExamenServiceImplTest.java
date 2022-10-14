@@ -7,6 +7,7 @@ import net.alekz.examples.repositories.ExamenRepositoryImpl;
 import net.alekz.examples.repositories.PreguntaRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -168,5 +169,17 @@ public class ExamenServiceImplTest {
         public String toString() {
             return "Mensaje personalizado de error // el id debe ser par";
         }
+    }
+
+    @Test
+    public void testArgumentCaptor(){
+        when(examenRepository.findAll()).thenReturn(Datos.EXAMENES);
+        service.findExamenByNameWithPreguntas("Historia");
+
+        ArgumentCaptor<Long> captor = ArgumentCaptor.forClass(Long.class);
+        verify(preguntaRepository).findPreguntasPorExamen(captor.capture());
+
+        assertEquals(2L, captor.getValue());
+
     }
 }
