@@ -5,6 +5,7 @@ import net.alekz.examples.models.Examen;
 import net.alekz.examples.repositories.ExamenRepository;
 import net.alekz.examples.repositories.ExamenRepositoryImpl;
 import net.alekz.examples.repositories.PreguntaRepository;
+import net.alekz.examples.repositories.PreguntaRepositoryImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -24,9 +25,9 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class ExamenServiceImplTest {
     @Mock
-    ExamenRepository examenRepository;
+    ExamenRepositoryImpl examenRepository;
     @Mock
-    PreguntaRepository preguntaRepository;
+    PreguntaRepositoryImpl preguntaRepository;
     @InjectMocks
     ExamenServiceImpl service;
 
@@ -232,5 +233,16 @@ public class ExamenServiceImplTest {
         System.out.println("Examen - preguntas " + examen.getPreguntas());
         verify(examenRepository).guardar(any(Examen.class));
 
+    }
+
+    @Test
+    void testDoCallRealMethod() {
+        when(examenRepository.findAll()).thenReturn(Datos.EXAMENES);
+        doCallRealMethod().when(preguntaRepository).findPreguntasPorExamen(anyLong());
+
+        Examen examen = service.findExamenByNameWithPreguntas("Matemáticas");
+        assertNotNull(examen);
+        assertEquals(1L, examen.getId());
+        assertTrue(examen.getPreguntas().contains("Trigonometría"));
     }
 }
