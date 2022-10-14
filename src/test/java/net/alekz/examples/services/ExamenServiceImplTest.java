@@ -15,6 +15,8 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
+import java.util.Collections;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -192,5 +194,43 @@ public class ExamenServiceImplTest {
         assertThrows(IllegalArgumentException.class, () -> {
            service.guardar(examen);
         });
+    }
+
+    @Test
+    void testDoAnswer() {
+        when(examenRepository.findAll()).thenReturn(Datos.EXAMENES);
+
+        doAnswer(invocation -> {
+            Long id = invocation.getArgument(0);
+            return id == 1L ? Datos.PREGUNTAS : Collections.emptyList();
+        }).when(preguntaRepository).findPreguntasPorExamen(anyLong());
+
+        Examen examen = service.findExamenByNameWithPreguntas("Matemáticas");
+        assertEquals(4, examen.getPreguntas().size());
+    }
+
+    @Test
+    void doAnswerGuardarExamenTest() {
+        Examen examenPreguntas = Datos.EXAMEN;
+        examenPreguntas.setPreguntas(Datos.PREGUNTAS);
+
+        doAnswer(new Answer<Examen>() {
+            Long id = 1L;
+            @Override
+            public Examen answer(InvocationOnMock invocationOnMock) throws Throwable {
+                Examen examen = invocationOnMock.getArgument(0);
+                examen.setId(id++);
+                return examen;
+            }
+        }).when(examenRepository).guardar(any(Examen.class));
+
+        Examen examen = service.guardar(Datos.EXAMEN);
+
+        assertNotNull(examen);
+        assertEquals(1L, examen.getId());
+        assertEquals("Física", examen.getNombre());
+        System.out.println("Examen - preguntas " + examen.getPreguntas());
+        verify(examenRepository).guardar(any(Examen.class));
+
     }
 }
