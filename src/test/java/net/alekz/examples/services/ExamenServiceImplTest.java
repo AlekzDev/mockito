@@ -180,6 +180,17 @@ public class ExamenServiceImplTest {
         verify(preguntaRepository).findPreguntasPorExamen(captor.capture());
 
         assertEquals(2L, captor.getValue());
+    }
 
+    @Test
+    void testDoThrow() {
+        Examen examen = Datos.EXAMEN;
+        examen.setPreguntas(Datos.PREGUNTAS);
+
+        doThrow(IllegalArgumentException.class).when(preguntaRepository).guardar(anyList());
+
+        assertThrows(IllegalArgumentException.class, () -> {
+           service.guardar(examen);
+        });
     }
 }
