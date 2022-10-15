@@ -159,10 +159,10 @@ public class ExamenServiceImplTest {
         verify(preguntaRepository).findPreguntasPorExamen(argThat(new Argumentos()));
     }
 
-    public static class Argumentos implements ArgumentMatcher<Long>{
+    public static class Argumentos implements ArgumentMatcher<Long> {
         @Override
         public boolean matches(Long aLong) {
-            return aLong%2 == 0;
+            return aLong % 2 == 0;
         }
 
         @Override
@@ -172,7 +172,7 @@ public class ExamenServiceImplTest {
     }
 
     @Test
-    public void testArgumentCaptor(){
+    public void testArgumentCaptor() {
         when(examenRepository.findAll()).thenReturn(Datos.EXAMENES);
         service.findExamenByNameWithPreguntas("Historia");
 
@@ -190,7 +190,7 @@ public class ExamenServiceImplTest {
         doThrow(IllegalArgumentException.class).when(preguntaRepository).guardar(anyList());
 
         assertThrows(IllegalArgumentException.class, () -> {
-           service.guardar(examen);
+            service.guardar(examen);
         });
     }
 
@@ -214,6 +214,7 @@ public class ExamenServiceImplTest {
 
         doAnswer(new Answer<Examen>() {
             Long id = 1L;
+
             @Override
             public Examen answer(InvocationOnMock invocationOnMock) throws Throwable {
                 Examen examen = invocationOnMock.getArgument(0);
@@ -249,7 +250,7 @@ public class ExamenServiceImplTest {
         //Con test invocamos al método real o al mock cuando usamos when
         ExamenRepository examenRepository = spy(ExamenRepositoryImpl.class);
         PreguntaRepository preguntaRepository = spy(PreguntaRepositoryImpl.class);
-        ExamenService examenService = new ExamenServiceImpl(examenRepository,preguntaRepository);
+        ExamenService examenService = new ExamenServiceImpl(examenRepository, preguntaRepository);
 
         //Siempre usar Do's con spy
         doReturn(Datos.PREGUNTAS).when(preguntaRepository).findPreguntasPorExamen(anyLong());
@@ -288,5 +289,28 @@ public class ExamenServiceImplTest {
         inOrder.verify(examenRepository).findAll();
         inOrder.verify(preguntaRepository).findPreguntasPorExamen(2L);
 
+    }
+
+
+    @Test
+    void testTimes() {
+        when(examenRepository.findAll()).thenReturn(Datos.EXAMENES);
+        service.findExamenByNameWithPreguntas("Matemáticas");
+
+        verify(preguntaRepository).findPreguntasPorExamen(anyLong());
+        verify(preguntaRepository, times(1)).findPreguntasPorExamen(anyLong());
+        verify(preguntaRepository, atLeast(1)).findPreguntasPorExamen(anyLong());
+        verify(preguntaRepository, atLeastOnce()).findPreguntasPorExamen(anyLong());
+        verify(preguntaRepository, atMost(1)).findPreguntasPorExamen(anyLong());
+        verify(preguntaRepository, atMostOnce()).findPreguntasPorExamen(anyLong());
+    }
+
+    @Test
+    void testTimesNever() {
+        when(examenRepository.findAll()).thenReturn(Collections.emptyList());
+        service.findExamenByNameWithPreguntas("Matemáticas");
+
+        verify(preguntaRepository,never()).findPreguntasPorExamen(anyLong());
+        verifyNoInteractions(preguntaRepository);
     }
 }
