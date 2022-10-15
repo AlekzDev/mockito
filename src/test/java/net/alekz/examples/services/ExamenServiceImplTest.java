@@ -245,4 +245,23 @@ public class ExamenServiceImplTest {
         assertEquals(1L, examen.getId());
         assertTrue(examen.getPreguntas().contains("Trigonometría"));
     }
+
+
+    @Test
+    void testSpy() {
+        //Con test invocamos al método real o al mock cuando usamos when
+        ExamenRepository examenRepository = spy(ExamenRepositoryImpl.class);
+        PreguntaRepository preguntaRepository = spy(PreguntaRepositoryImpl.class);
+        ExamenService examenService = new ExamenServiceImpl(examenRepository,preguntaRepository);
+
+        //Siempre usar Do's con spy
+        doReturn(Datos.PREGUNTAS).when(preguntaRepository).findPreguntasPorExamen(anyLong());
+
+
+        Examen examen = examenService.findExamenByNameWithPreguntas("Matemáticas");
+        assertNotNull(examen);
+        assertEquals(1L, examen.getId());
+        assertTrue(examen.getPreguntas().contains("Trigonometría"));
+
+    }
 }
