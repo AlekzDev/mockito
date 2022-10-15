@@ -8,10 +8,7 @@ import net.alekz.examples.repositories.PreguntaRepository;
 import net.alekz.examples.repositories.PreguntaRepositoryImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatcher;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
@@ -262,6 +259,34 @@ public class ExamenServiceImplTest {
         assertNotNull(examen);
         assertEquals(1L, examen.getId());
         assertTrue(examen.getPreguntas().contains("Trigonometría"));
+
+    }
+
+    @Test
+    void testOrder1() {
+        when(examenRepository.findAll()).thenReturn(Datos.EXAMENES);
+
+        service.findExamenByNameWithPreguntas("Matemáticas");
+        service.findExamenByNameWithPreguntas("Historia");
+
+        InOrder inOrder = inOrder(preguntaRepository);
+        inOrder.verify(preguntaRepository).findPreguntasPorExamen(1L);
+        inOrder.verify(preguntaRepository).findPreguntasPorExamen(2L);
+
+    }
+
+    @Test
+    void testOrder2() {
+        when(examenRepository.findAll()).thenReturn(Datos.EXAMENES);
+
+        service.findExamenByNameWithPreguntas("Matemáticas");
+        service.findExamenByNameWithPreguntas("Historia");
+
+        InOrder inOrder = inOrder(examenRepository, preguntaRepository);
+        inOrder.verify(examenRepository).findAll();
+        inOrder.verify(preguntaRepository).findPreguntasPorExamen(1L);
+        inOrder.verify(examenRepository).findAll();
+        inOrder.verify(preguntaRepository).findPreguntasPorExamen(2L);
 
     }
 }
